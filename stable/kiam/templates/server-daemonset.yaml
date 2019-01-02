@@ -1,4 +1,5 @@
 {{- if .Values.server.enabled -}}
+{{- $serverCaPath := .Values.server.tlsFiles.caPath | default "/etc/kiam/tls/ca" -}}
 apiVersion: apps/v1beta2
 kind: DaemonSet
 metadata:
@@ -61,7 +62,7 @@ spec:
             - --bind=0.0.0.0:{{ .Values.server.service.targetPort }}
             - --cert=/etc/kiam/tls/cert
             - --key=/etc/kiam/tls/key
-            - --ca=/etc/kiam/tls/ca
+            - --ca={{ $serverCaPath }}
             {{- if .Values.server.roleBaseArn }}
             - --role-base-arn={{ .Values.server.roleBaseArn }}
             {{- else }}
@@ -105,7 +106,7 @@ spec:
                 - health
                 - --cert=/etc/kiam/tls/cert
                 - --key=/etc/kiam/tls/key
-                - --ca=/etc/kiam/tls/ca
+                - --ca={{ $serverCaPath }}
                 - --server-address={{ .Values.server.probes.serverAddress }}:{{ .Values.server.service.targetPort }}
                 - --server-address-refresh=2s
                 - --timeout=5s
@@ -120,7 +121,7 @@ spec:
                 - health
                 - --cert=/etc/kiam/tls/cert
                 - --key=/etc/kiam/tls/key
-                - --ca=/etc/kiam/tls/ca
+                - --ca={{ $serverCaPath }}
                 - --server-address={{ .Values.server.probes.serverAddress }}:{{ .Values.server.service.targetPort }}
                 - --server-address-refresh=2s
                 - --timeout=5s
