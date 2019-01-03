@@ -1,5 +1,7 @@
 {{- if .Values.server.enabled -}}
-{{- $serverCaPath := .Values.server.tlsFiles.caPath | default "/etc/kiam/tls/ca" -}}
+{{- $serverCaPath := .Values.server.tlsConfig.caPath | default "/etc/kiam/tls/ca" -}}
+{{- $serverCertFile := .Values.server.tlsConfig.certFile | default "cert" -}}
+{{- $serverKeyFile := .Values.server.tlsConfig.keyFile | default "cert" -}}
 apiVersion: apps/v1beta2
 kind: DaemonSet
 metadata:
@@ -42,6 +44,11 @@ spec:
         - name: tls
           secret:
             secretName: {{ template "kiam.fullname" . }}-server
+      {{- range .Values.server.extraSecretMounts }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+      {{- end }}
       {{- range .Values.server.extraHostPathMounts }}
         - name: {{ .name }}
           hostPath:
@@ -60,8 +67,8 @@ spec:
             {{- end }}
             - --level={{ .Values.server.log.level }}
             - --bind=0.0.0.0:{{ .Values.server.service.targetPort }}
-            - --cert=/etc/kiam/tls/cert
-            - --key=/etc/kiam/tls/key
+            - --cert=/etc/kiam/tls/{{ $serverCertFile }}
+            - --key=/etc/kiam/tls/{{ $serverKeyFile }}
             - --ca={{ $serverCaPath }}
             {{- if .Values.server.roleBaseArn }}
             - --role-base-arn={{ .Values.server.roleBaseArn }}
@@ -94,6 +101,10 @@ spec:
           volumeMounts:
             - mountPath: /etc/kiam/tls
               name: tls
+          {{- range .Values.server.extraSecretMounts }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+          {{- end }}
           {{- range .Values.server.extraHostPathMounts }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
@@ -104,8 +115,8 @@ spec:
               command:
                 - /kiam
                 - health
-                - --cert=/etc/kiam/tls/cert
-                - --key=/etc/kiam/tls/key
+                - --cert=/etc/kiam/tls/{{ $serverCertFile }}
+                - --key=/etc/kiam/tls/{{ $serverKeyFile }}
                 - --ca={{ $serverCaPath }}
                 - --server-address={{ .Values.server.probes.serverAddress }}:{{ .Values.server.service.targetPort }}
                 - --server-address-refresh=2s
@@ -119,8 +130,8 @@ spec:
               command:
                 - /kiam
                 - health
-                - --cert=/etc/kiam/tls/cert
-                - --key=/etc/kiam/tls/key
+                - --cert=/etc/kiam/tls/{{ $serverCertFile }}
+                - --key=/etc/kiam/tls/{{ $serverKeyFile }}
                 - --ca={{ $serverCaPath }}
                 - --server-address={{ .Values.server.probes.serverAddress }}:{{ .Values.server.service.targetPort }}
                 - --server-address-refresh=2s

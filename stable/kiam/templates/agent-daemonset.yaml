@@ -1,5 +1,7 @@
 {{- if .Values.agent.enabled -}}
-{{- $agentCaPath := .Values.agent.tlsFiles.caPath | default "/etc/kiam/tls/ca" }}
+{{- $agentCaPath := .Values.agent.tlsConfig.caPath | default "/etc/kiam/tls/ca" }}
+{{- $agentCertFile := .Values.agent.tlsConfig.certFile | default "cert" }}
+{{- $agentKeyFile := .Values.agent.tlsConfig.keyFile | default "key" }}
 apiVersion: apps/v1beta2
 kind: DaemonSet
 metadata:
@@ -49,6 +51,11 @@ spec:
         - name: xtables
           hostPath:
             path: /run/xtables.lock
+      {{- range .Values.agent.extraSecretMounts }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+      {{- end }}
       {{- range .Values.agent.extraHostPathMounts }}
         - name: {{ .name }}
           hostPath:
@@ -75,8 +82,8 @@ spec:
             {{- end }}
             - --level={{ .Values.agent.log.level }}
             - --port={{ .Values.agent.host.port }}
-            - --cert=/etc/kiam/tls/cert
-            - --key=/etc/kiam/tls/key
+            - --cert=/etc/kiam/tls/{{ $agentCertFile }}
+            - --key=/etc/kiam/tls/{{ $agentKeyFile }}
             - --ca={{ $agentCaPath }}
             - --server-address={{ template "kiam.fullname" . }}-server:{{ .Values.server.service.port }}
             {{- if .Values.agent.prometheus.scrape }}
@@ -105,6 +112,10 @@ spec:
               name: tls
             - mountPath: /var/run/xtables.lock
               name: xtables
+          {{- range .Values.agent.extraSecretMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
           {{- range .Values.agent.extraHostPathMounts }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}

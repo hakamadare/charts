@@ -65,6 +65,13 @@ agent:
   ##
   extraEnv: {}
 
+  ## Additional container secret mounts
+  ##
+  extraSecretMounts: []
+    # - name: cacert
+    #   secretName: cert-manager-intermediate-ca-tls
+    #   mountPath: /etc/kiam/cacert
+
   ## Additional container hostPath mounts
   ##
   extraHostPathMounts: []
@@ -86,6 +93,11 @@ agent:
     ca:
     cert:
     key:
+
+  ## Additional TLS configuration (not secret)
+  ##
+  tlsConfig:
+    caPath:
 
 server:
   ## If false, server will not be installed
@@ -139,6 +151,13 @@ server:
   ##
   extraEnv: {}
 
+  ## Additional container secret mounts
+  ##
+  extraSecretMounts: []
+    # - name: cacert
+    #   secretName: cert-manager-intermediate-ca-tls
+    #   mountPath: /etc/kiam/cacert
+
   ## Additional container hostPath mounts
   ##
   extraHostPathMounts: []
@@ -168,6 +187,11 @@ server:
     ca:
     cert:
     key:
+
+  ## Additional TLS configuration (not secret)
+  ##
+  tlsConfig:
+    caPath:
 
   ## Base ARN for IAM roles
   ## If not specified use EC2 metadata service to detect ARN prefix
