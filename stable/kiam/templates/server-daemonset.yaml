@@ -1,6 +1,10 @@
 {{- if .Values.server.enabled -}}
 apiVersion: apps/v1beta2
+{{- if .Values.server.deployment.enabled }}
+kind: Deployment
+{{- else }}
 kind: DaemonSet
+{{- end }}
 metadata:
   labels:
     app: {{ template "kiam.name" . }}
@@ -10,6 +14,17 @@ metadata:
     release: {{ .Release.Name }}
   name: {{ template "kiam.fullname" . }}-server
 spec:
+  {{- if .Values.server.deployment.enabled }}
+  replicas: {{ .Values.server.deployment.replicas | default 1 }}
+  strategy:
+    type: {{ .Values.server.deployment.strategy | default "RollingUpdate" | quote }}
+    maxUnavailable: {{ .Values.server.maxUnavailable | default 1 }}
+    maxSurge: {{ .Values.server.deployment.maxSurge | default 1 }}
+  {{- else }}
+  updateStrategy:
+    type: {{ .Values.server.updateStrategy | default "OnDelete" | quote }}
+    maxUnavailable: {{ .Values.server.maxUnavailable | default 1 }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ template "kiam.name" . }}
@@ -143,6 +158,4 @@ spec:
           resources:
 {{ toYaml .Values.server.resources | indent 12 }}
         {{- end }}
-  updateStrategy:
-    type: {{ .Values.server.updateStrategy }}
 {{- end }}

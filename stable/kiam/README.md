@@ -128,6 +128,10 @@ Parameter | Description | Default
 `agent.updateStrategy` | Strategy for agent DaemonSet updates (requires Kubernetes 1.6+) | `OnDelete`
 `server.enabled` | If true, create server | `true`
 `server.name` | Server container name | `server`
+`server.deployment.enabled` | Manage server Pods with a Deployment rather than a DaemonSet | `false`
+`server.deployment.replicas` | Number of Pods in server Deployment | `1`
+`server.deployment.maxSurge` | Maximum number of Pods allowed above `replicas` in Deployment (requires Kubernetes 1.6+) | `1`
+`server.deployment.strategy` | Strategy for server Deployment updates | `RollingUpdate`
 `server.gatewayTimeoutCreation` | Server's timeout when creating the kiam gateway | `50ms`
 `server.image.repository` | Server image | `quay.io/uswitch/kiam`
 `server.image.tag` | Server image tag | `v3.2`
@@ -161,6 +165,7 @@ Parameter | Description | Default
 `server.tolerations` | Tolerations to be applied to server pods | `[]`
 `server.affinity` | Node affinity for pod assignment | `{}`
 `server.updateStrategy` | Strategy for server DaemonSet updates (requires Kubernetes 1.6+) | `OnDelete`
+`server.maxUnavailable` | Maximum number of unavailable Pods to allow during update (requires Kubernetes 1.6+) | `1`
 `server.useHostNetwork` | If true, use hostNetwork on server to bypass agent iptable rules | `false`
 `rbac.create` | If `true`, create & use RBAC resources | `true`
 `psp.create` | If `true`, create Pod Security Policies for the agent and server when enabled | `false`

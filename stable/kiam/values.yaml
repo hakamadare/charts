@@ -140,6 +140,13 @@ server:
     tag: v3.2
     pullPolicy: IfNotPresent
 
+  ## Optionally manage Pods with Deployment
+  deployment:
+    enabled: false
+    maxSurge: 1
+    replicas: 1
+    strategy: "RollingUpdate"
+
   ## Logging settings
   ##
   log:
